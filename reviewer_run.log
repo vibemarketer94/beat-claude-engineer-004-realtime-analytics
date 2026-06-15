@@ -1,0 +1,261 @@
+>>> python3 -m unittest benchmarks/test_old_vs_new_benchmark.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.006s
+
+OK
+<<< exit=0 expected=0
+
+>>> python3 -m unittest curveballs/test_curveball_scenarios.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+<<< exit=0 expected=0
+
+>>> python3 -m unittest sensitivity/test_sensitivity_model.py
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK
+<<< exit=0 expected=0
+
+>>> python3 benchmarks/old_vs_new_benchmark.py
+# Before/After Benchmark Report
+
+This is a synthetic before/after benchmark. It compares a broken current-pipeline model against a proposed-pipeline model using the same accepted-event workload and a declared method.
+
+| Scenario | Events | Old loss | New loss | Loss improvement | Old dupes | New dupes | Dupe improvement | Old p95 freshness | New p95 freshness | Freshness improvement | Gate |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| peak_expected | 50000 | 3.032% | 0.088% | 97.1% | 0.567% | 0.27% | 52.36% | 1320s | 4.2s | 99.68% | pass |
+| black_friday_spike | 200000 | 3.009% | 0.148% | 95.06% | 0.905% | 0.394% | 56.5% | 1800s | 4.8s | 99.73% | pass |
+| proposed_regression | 50000 | 2.902% | 1.228% | 57.68% | 0.54% | 1.079% | -99.99% | 1320s | 8.0s | 99.39% | fail |
+
+## Method
+
+- [Observed] Current pipeline peak loss is modeled from the public brief's about 3% event loss.
+- [Observed] Current dashboard freshness is modeled from the public brief's 15-30 minute latency range.
+- [Estimated] Proposed loss, duplicate, and freshness values are candidate SLO targets tested by the benchmark.
+- [Estimated] Proposed cutover gate fails when new loss exceeds 0.5%, duplicates exceed 0.5%, or p95 freshness exceeds 5 seconds.
+
+## Tier 4 Claim
+
+This supports Tier 4 as synthetic before/after benchmark evidence: measured change with a clear benchmark and method. It is not Tier 5 and not production before/after data.
+
+<<< exit=0 expected=0
+
+>>> python3 modeling/capacity_cost_model.py
+# Capacity and Cost Model Results
+
+All prices are planning inputs, not an AWS quote. Workload-specific DynamoDB, Redis, Fargate, export, and observability values remain assumptions until benchmarked.
+
+| Scenario | Avg eps | Peak eps | Peak MB/s | Ingest TB/mo | Raw TB | Kinesis | Flink | S3 | DynamoDB | Fargate | Redis | Logs | Fixed | Total | < $50K |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| mvp_expected | 578.7 | 5787.0 | 5.79 | 1.5 | 2.03 | $96.0 | $633.6 | $46.58 | $87.5 | $750.0 | $465.0 | $7.5 | $2250.0 | $4336.18 | yes |
+| full_expected | 578.7 | 5787.0 | 5.79 | 1.5 | 6.08 | $96.0 | $1267.2 | $139.72 | $437.5 | $1250.0 | $930.0 | $15.0 | $2250.0 | $6385.43 | yes |
+| large_payload | 578.7 | 5787.0 | 14.47 | 3.75 | 15.19 | $240.0 | $1584.0 | $349.31 | $437.5 | $1750.0 | $1240.0 | $37.5 | $2250.0 | $7888.31 | yes |
+| growth_2x | 1157.4 | 11574.1 | 11.57 | 3.0 | 12.15 | $192.0 | $1900.8 | $279.45 | $875.0 | $2000.0 | $1240.0 | $30.0 | $2250.0 | $8767.25 | yes |
+
+## Interpretation
+
+- [Estimated] The base workload is comfortably under the [Observed] $50K/month ceiling in this model.
+- [Estimated] DynamoDB hot aggregate write shape dominates variable cost more than raw streaming intake.
+- [Estimated] Payload growth matters less than hot-store write amplification unless retention and exports are uncontrolled.
+- [Assumed] The model uses a 1.35 raw-storage multiplier for normalized copies, metadata, and small-file overhead.
+
+## Source Labels
+
+- [Observed] 50M events/day, 10x spikes, 500+ tenants, and $50K/month ceiling come from the public brief.
+- [Benchmarked] Kinesis, Flink, S3, DynamoDB, CloudWatch, Fargate, and ElastiCache prices are public AWS pricing-page inputs checked in June 2026.
+- [Assumed] DynamoDB write amplification, task count, Redis node count, export support, and log sampling are workload placeholders.
+
+<<< exit=0 expected=0
+
+>>> python3 modeling/migration_simulation.py
+# Migration Simulation Results
+
+This simulation scales the migration problem down to synthetic dual-write cohorts. It does not claim production proof; it demonstrates the gates and failure behavior.
+
+| Scenario | Events | Old seen | New seen | Old loss | New loss | Old/new delta | Duplicate % | Late % | Freshness p95 | Worst tenant delta | Gate |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| baseline_current | 50000 | 48484 | 49958 | 3.032% | 0.084% | 2.948% | 0.25% | 0.966% | 3.8s | 50 | yes |
+| black_friday_spike | 200000 | 193987 | 199597 | 3.006% | 0.201% | 2.805% | 0.574% | 2.988% | 4.7s | 143 | no |
+| new_pipeline_regression | 50000 | 48532 | 49405 | 2.936% | 1.19% | 1.746% | 1.065% | 2.022% | 6.4s | 29 | no |
+
+## Gate Logic
+
+- [Estimated] New-path loss against accepted intake must be <= 0.5%.
+- [Estimated] Duplicate rate must be <= 0.5%.
+- [Observed target] Freshness p95 must be <= 5 seconds.
+- [Estimated] Worst tenant old/new count delta must be <= 75 events in the synthetic cohort.
+
+## Interpretation
+
+- [Observed] The current-path 3% loss from the brief creates a baseline comparison problem; new-path gates should compare against accepted intake, not blindly match broken old counts.
+- [Estimated] The spike scenario can pass if new-path loss, duplicates, and freshness stay within gates.
+- [Estimated] The regression scenario fails because freshness and parity gates catch it before cutover.
+
+<<< exit=0 expected=0
+
+>>> python3 curveballs/curveball_scenarios.py
+wrote 6 curveball scenarios
+tenant_hotspot: gate=manual_review action=isolate tenant and keep old read path
+missing_event_id: gate=pass_with_warning action=accept with server id and warning
+gdpr_delete_during_replay: gate=fail action=block cutover until tombstones reconcile
+warehouse_export_failure: gate=fail action=pause export cutover and regenerate from S3 partition
+kinesis_backpressure: gate=manual_review action=shed freshness, buffer accepted events, and request shard/on-demand increase
+sdk_clock_skew: gate=pass_with_warning action=use received_at for freshness SLO and event_time for late-window analytics
+<<< exit=0 expected=0
+
+>>> python3 sensitivity/sensitivity_model.py
+wrote 6 sensitivity scenarios
+brief_peak: gate=pass mbps=5.65 freshness=3.9s cost=$7040.0/month
+large_payload_10x: gate=manual_review mbps=45.21 freshness=8.6s cost=$7302.5/month
+tenant_skew_35pct: gate=manual_review mbps=5.65 freshness=3.9s cost=$9845.0/month
+late_events_15pct: gate=manual_review mbps=5.65 freshness=8.8s cost=$8720.0/month
+export_write_amp_6x: gate=manual_review mbps=5.65 freshness=3.9s cost=$10290.0/month
+cost_ceiling_pressure: gate=fail mbps=180.84 freshness=29.7s cost=$55312.5/month
+<<< exit=0 expected=0
+
+>>> python3 validation_harness/run_validation.py validation_harness/sample_events.jsonl
+FAIL case=failure input=3 unique=3 old_expected=4 parity_ok=False
+  warning: missing_sequences=1
+  warning: parity_mismatch old=4 new=3
+  review: tenant_d:anon_5 missing [2]
+  action: hold rollout and require human review
+PASS case=messy input=4 unique=3 old_expected=3 parity_ok=True
+  warning: duplicates=1
+PASS case=normal input=4 unique=4 old_expected=4 parity_ok=True
+OVERALL FAIL_REQUIRES_REVIEW
+<<< exit=1 expected=1
+
+>>> python3 verify_packet.py
+# Packet Verification Report
+
+- PASS: required file ENGINEER_004_SUBMISSION_READY.md - present
+- PASS: required file README.md - present
+- PASS: required file submission.md - present
+- PASS: required file architecture.mmd - present
+- PASS: required file cost_model.md - present
+- PASS: required file event_contract.md - present
+- PASS: required file migration_runbook.md - present
+- PASS: required file validation_plan.md - present
+- PASS: required file evidence_log.md - present
+- PASS: required file reviewer_scorecard.md - present
+- PASS: required file challenge_requirements_matrix.md - present
+- PASS: required file operating_artifact.md - present
+- PASS: required file ai_usage.md - present
+- PASS: required file walkthrough.md - present
+- PASS: required file run_reviewer_packet.sh - present
+- PASS: required file reviewer_run.log - present
+- PASS: required file validation_harness/README.md - present
+- PASS: required file validation_harness/sample_events.jsonl - present
+- PASS: required file validation_harness/run_validation.py - present
+- PASS: required file validation_harness/expected_output.md - present
+- PASS: required file modeling/capacity_cost_model.py - present
+- PASS: required file modeling/migration_simulation.py - present
+- PASS: required file modeling/capacity_cost_report.md - present
+- PASS: required file modeling/capacity_cost_results.csv - present
+- PASS: required file modeling/capacity_cost_trace.log - present
+- PASS: required file modeling/migration_simulation_report.md - present
+- PASS: required file modeling/migration_simulation_results.csv - present
+- PASS: required file modeling/migration_simulation_trace.log - present
+- PASS: required file validation_harness/validation_trace.log - present
+- PASS: required file benchmarks/old_vs_new_benchmark.py - present
+- PASS: required file benchmarks/test_old_vs_new_benchmark.py - present
+- PASS: required file benchmarks/before_after_report.md - present
+- PASS: required file benchmarks/before_after_results.csv - present
+- PASS: required file benchmarks/before_after_trace.log - present
+- PASS: required file curveballs/curveball_scenarios.py - present
+- PASS: required file curveballs/test_curveball_scenarios.py - present
+- PASS: required file curveballs/curveball_report.md - present
+- PASS: required file curveballs/curveball_results.csv - present
+- PASS: required file curveballs/curveball_trace.log - present
+- PASS: required file sensitivity/sensitivity_model.py - present
+- PASS: required file sensitivity/test_sensitivity_model.py - present
+- PASS: required file sensitivity/sensitivity_report.md - present
+- PASS: required file sensitivity/sensitivity_results.csv - present
+- PASS: required file sensitivity/sensitivity_trace.log - present
+- PASS: submission length - short answer 1221 words <= 1800; upload file 1641 words <= 2200 proxy
+- PASS: brief coverage 50M - mentioned in packet
+- PASS: brief coverage 10x - mentioned in packet
+- PASS: brief coverage 5 second - mentioned in packet
+- PASS: brief coverage AWS - mentioned in packet
+- PASS: brief coverage SDK - mentioned in packet
+- PASS: brief coverage 500+ - mentioned in packet
+- PASS: brief coverage SOC 2 - mentioned in packet
+- PASS: brief coverage GDPR - mentioned in packet
+- PASS: brief coverage CCPA - mentioned in packet
+- PASS: brief coverage Snowflake - mentioned in packet
+- PASS: brief coverage BigQuery - mentioned in packet
+- PASS: brief coverage rollback - mentioned in packet
+- PASS: brief coverage validate - mentioned in packet
+- PASS: brief coverage warehouse - mentioned in packet
+- PASS: brief coverage personalization - mentioned in packet
+- PASS: brief coverage segment - mentioned in packet
+- PASS: brief coverage identity - mentioned in packet
+- PASS: brief coverage stitching - mentioned in packet
+- PASS: brief coverage trade-off - mentioned in packet
+- PASS: brief coverage risk - mentioned in packet
+- PASS: brief coverage zero data loss - mentioned in packet
+- PASS: matrix coverage High-level system diagram - mapped in challenge requirements matrix
+- PASS: matrix coverage Technology/services - mapped in challenge requirements matrix
+- PASS: matrix coverage Event data structure - mapped in challenge requirements matrix
+- PASS: matrix coverage identity/stitching - mapped in challenge requirements matrix
+- PASS: matrix coverage 50M+ events/day - mapped in challenge requirements matrix
+- PASS: matrix coverage 10x spikes - mapped in challenge requirements matrix
+- PASS: matrix coverage Zero data loss - mapped in challenge requirements matrix
+- PASS: matrix coverage Rollback plan - mapped in challenge requirements matrix
+- PASS: matrix coverage Validate data accuracy - mapped in challenge requirements matrix
+- PASS: matrix coverage Trade-offs and risks - mapped in challenge requirements matrix
+- PASS: matrix coverage No SDK breaking change - mapped in challenge requirements matrix
+- PASS: matrix coverage Written answer - mapped in challenge requirements matrix
+- PASS: matrix coverage Operating artifact - mapped in challenge requirements matrix
+- PASS: matrix coverage Evidence log - mapped in challenge requirements matrix
+- PASS: matrix coverage Number source labels - mapped in challenge requirements matrix
+- PASS: matrix coverage AI usage disclosure - mapped in challenge requirements matrix
+- PASS: matrix coverage What breaks it - mapped in challenge requirements matrix
+- PASS: matrix coverage What stays human - mapped in challenge requirements matrix
+- PASS: number labels - all scanned numeric claim lines include source labels
+- PASS: harness exit code - exit code 1; failure case should require review
+- PASS: harness expected output - stdout matches expected_output.md
+- PASS: harness normal case - normal case passes
+- PASS: harness messy case - messy case passes with duplicate warning
+- PASS: harness failure case - failure case fails
+- PASS: harness human review - failure routes to human review
+- PASS: model modeling/capacity_cost_model.py - script runs successfully
+- PASS: model modeling/migration_simulation.py - script runs successfully
+- PASS: capacity model growth scenario - 2x growth scenario present
+- PASS: capacity model ceiling - 50K ceiling column present
+- PASS: migration regression scenario - regression scenario present
+- PASS: migration failure gate - regression fails gate
+- PASS: capacity trace - generated trace includes growth scenario
+- PASS: migration trace - generated trace includes regression scenario
+- PASS: validation trace - generated trace includes expected failure gate
+- PASS: before/after tests - unit tests pass
+- PASS: before/after benchmark - script runs successfully
+- PASS: before/after tier 4 note - report explains synthetic Tier 4 claim
+- PASS: before/after loss delta - peak expected loss improvement present
+- PASS: before/after freshness delta - peak expected freshness improvement present
+- PASS: before/after regression gate - regression scenario fails
+- PASS: curveball tests - command runs successfully
+- PASS: sensitivity tests - command runs successfully
+- PASS: curveball scenarios - command runs successfully
+- PASS: sensitivity model - command runs successfully
+- PASS: curveball tenant hotspot - private-review curveball present
+- PASS: curveball deletion replay - compliance curveball present
+- PASS: curveball export failure - warehouse curveball present
+- PASS: sensitivity cost cliff - budget cliff present
+- PASS: sensitivity manual review gate - manual-review gates present
+- PASS: sensitivity fail gate trace - failing scenario recorded
+- PASS: curveball fail gate trace - failing curveball recorded
+- PASS: source aws.amazon.com/kinesis/data-streams/pricing - present in cost model
+- PASS: source docs.aws.amazon.com/streams/latest/dev/service-sizes-and-limits - present in cost model
+- PASS: source aws.amazon.com/managed-service-apache-flink/pricing - present in cost model
+- PASS: source aws.amazon.com/s3/pricing - present in cost model
+
+<<< exit=0 expected=0
+
+reviewer replay passed; see reviewer_run.log

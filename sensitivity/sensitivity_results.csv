@@ -1,0 +1,7 @@
+scenario,spike_multiplier,event_kb,tenant_skew_pct,late_event_pct,export_write_amp,stream_mbps,freshness_seconds,monthly_cost,gate,action
+brief_peak,10,1.0,2,1,1,5.65,3.9,7040.0,pass,eligible for cohort cutover after parity hold
+large_payload_10x,10,8.0,2,1,1,45.21,8.6,7302.5,manual_review,keep dual-write and require human go/no-go
+tenant_skew_35pct,10,1.0,35,1,1,5.65,3.9,9845.0,manual_review,keep dual-write and require human go/no-go
+late_events_15pct,10,1.0,2,15,1,5.65,8.8,8720.0,manual_review,keep dual-write and require human go/no-go
+export_write_amp_6x,10,1.0,2,1,6,5.65,3.9,10290.0,manual_review,keep dual-write and require human go/no-go
+cost_ceiling_pressure,20,16.0,35,15,8,180.84,29.7,55312.5,fail,"do not cut over; resize, reduce exports, or change architecture"

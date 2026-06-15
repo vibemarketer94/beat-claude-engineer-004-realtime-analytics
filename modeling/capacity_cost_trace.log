@@ -1,0 +1,24 @@
+# Capacity and Cost Model Results
+
+All prices are planning inputs, not an AWS quote. Workload-specific DynamoDB, Redis, Fargate, export, and observability values remain assumptions until benchmarked.
+
+| Scenario | Avg eps | Peak eps | Peak MB/s | Ingest TB/mo | Raw TB | Kinesis | Flink | S3 | DynamoDB | Fargate | Redis | Logs | Fixed | Total | < $50K |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| mvp_expected | 578.7 | 5787.0 | 5.79 | 1.5 | 2.03 | $96.0 | $633.6 | $46.58 | $87.5 | $750.0 | $465.0 | $7.5 | $2250.0 | $4336.18 | yes |
+| full_expected | 578.7 | 5787.0 | 5.79 | 1.5 | 6.08 | $96.0 | $1267.2 | $139.72 | $437.5 | $1250.0 | $930.0 | $15.0 | $2250.0 | $6385.43 | yes |
+| large_payload | 578.7 | 5787.0 | 14.47 | 3.75 | 15.19 | $240.0 | $1584.0 | $349.31 | $437.5 | $1750.0 | $1240.0 | $37.5 | $2250.0 | $7888.31 | yes |
+| growth_2x | 1157.4 | 11574.1 | 11.57 | 3.0 | 12.15 | $192.0 | $1900.8 | $279.45 | $875.0 | $2000.0 | $1240.0 | $30.0 | $2250.0 | $8767.25 | yes |
+
+## Interpretation
+
+- [Estimated] The base workload is comfortably under the [Observed] $50K/month ceiling in this model.
+- [Estimated] DynamoDB hot aggregate write shape dominates variable cost more than raw streaming intake.
+- [Estimated] Payload growth matters less than hot-store write amplification unless retention and exports are uncontrolled.
+- [Assumed] The model uses a 1.35 raw-storage multiplier for normalized copies, metadata, and small-file overhead.
+
+## Source Labels
+
+- [Observed] 50M events/day, 10x spikes, 500+ tenants, and $50K/month ceiling come from the public brief.
+- [Benchmarked] Kinesis, Flink, S3, DynamoDB, CloudWatch, Fargate, and ElastiCache prices are public AWS pricing-page inputs checked in June 2026.
+- [Assumed] DynamoDB write amplification, task count, Redis node count, export support, and log sampling are workload placeholders.
+

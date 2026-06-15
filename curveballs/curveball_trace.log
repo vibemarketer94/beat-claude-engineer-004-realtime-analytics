@@ -1,0 +1,7 @@
+curveball_scenarios run
+tenant_hotspot gate=manual_review action=isolate tenant and keep old read path
+missing_event_id gate=pass_with_warning action=accept with server id and warning
+gdpr_delete_during_replay gate=fail action=block cutover until tombstones reconcile
+warehouse_export_failure gate=fail action=pause export cutover and regenerate from S3 partition
+kinesis_backpressure gate=manual_review action=shed freshness, buffer accepted events, and request shard/on-demand increase
+sdk_clock_skew gate=pass_with_warning action=use received_at for freshness SLO and event_time for late-window analytics

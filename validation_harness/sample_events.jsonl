@@ -1,0 +1,12 @@
+{"case":"normal","tenant_id":"tenant_a","event_id":"n-001","anonymous_id":"anon_1","user_id":null,"event_type":"page_view","occurred_at":"2026-06-15T10:00:00Z","sequence":1,"old_pipeline_expected":4}
+{"case":"normal","tenant_id":"tenant_a","event_id":"n-002","anonymous_id":"anon_1","user_id":null,"event_type":"click","occurred_at":"2026-06-15T10:00:01Z","sequence":2,"old_pipeline_expected":4}
+{"case":"normal","tenant_id":"tenant_b","event_id":"n-003","anonymous_id":"anon_2","user_id":"user_2","event_type":"page_view","occurred_at":"2026-06-15T10:00:02Z","sequence":1,"old_pipeline_expected":4}
+{"case":"normal","tenant_id":"tenant_b","event_id":"n-004","anonymous_id":"anon_2","user_id":"user_2","event_type":"form_submit","occurred_at":"2026-06-15T10:00:03Z","sequence":2,"old_pipeline_expected":4}
+{"case":"messy","tenant_id":"tenant_a","event_id":"m-001","anonymous_id":"anon_3","user_id":null,"event_type":"page_view","occurred_at":"2026-06-15T10:01:02Z","sequence":2,"old_pipeline_expected":3}
+{"case":"messy","tenant_id":"tenant_a","event_id":"m-001","anonymous_id":"anon_3","user_id":null,"event_type":"page_view","occurred_at":"2026-06-15T10:01:02Z","sequence":2,"old_pipeline_expected":3}
+{"case":"messy","tenant_id":"tenant_a","event_id":"m-002","anonymous_id":"anon_3","user_id":null,"event_type":"click","occurred_at":"2026-06-15T10:01:01Z","sequence":1,"old_pipeline_expected":3}
+{"case":"messy","tenant_id":"tenant_c","event_id":"m-003","anonymous_id":"anon_4","user_id":"user_4","event_type":"page_view","occurred_at":"2026-06-15T10:01:03Z","sequence":1,"old_pipeline_expected":3}
+{"case":"failure","tenant_id":"tenant_d","event_id":"f-001","anonymous_id":"anon_5","user_id":null,"event_type":"page_view","occurred_at":"2026-06-15T10:02:00Z","sequence":1,"old_pipeline_expected":4}
+{"case":"failure","tenant_id":"tenant_d","event_id":"f-003","anonymous_id":"anon_5","user_id":null,"event_type":"click","occurred_at":"2026-06-15T10:02:02Z","sequence":3,"old_pipeline_expected":4}
+{"case":"failure","tenant_id":"tenant_d","event_id":"f-004","anonymous_id":"anon_5","user_id":null,"event_type":"form_submit","occurred_at":"2026-06-15T10:02:03Z","sequence":4,"old_pipeline_expected":4}
+

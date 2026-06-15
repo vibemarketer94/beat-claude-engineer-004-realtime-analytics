@@ -1,0 +1,4 @@
+scenario,events,old_event_loss_pct,new_event_loss_pct,event_loss_improvement_pct,old_duplicate_pct,new_duplicate_pct,duplicate_improvement_pct,old_freshness_p95_sec,new_freshness_p95_sec,freshness_improvement_pct,proposed_gate,failure_reasons
+peak_expected,50000,3.032,0.088,97.1,0.567,0.27,52.36,1320,4.2,99.68,pass,none
+black_friday_spike,200000,3.009,0.148,95.06,0.905,0.394,56.5,1800,4.8,99.73,pass,none
+proposed_regression,50000,2.902,1.228,57.68,0.54,1.079,-99.99,1320,8.0,99.39,fail,"loss,duplicates,freshness"

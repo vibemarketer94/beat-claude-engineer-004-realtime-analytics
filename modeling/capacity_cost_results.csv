@@ -1,0 +1,5 @@
+scenario,avg_events_sec,peak_events_sec,peak_mb_sec,ingest_tb_month,raw_storage_tb,kinesis_month,flink_month,s3_month,dynamodb_month,fargate_month,redis_month,logs_month,fixed_export_observability_month,estimated_total_month,under_50k
+mvp_expected,578.7,5787.0,5.79,1.5,2.03,96.0,633.6,46.58,87.5,750.0,465.0,7.5,2250.0,4336.18,yes
+full_expected,578.7,5787.0,5.79,1.5,6.08,96.0,1267.2,139.72,437.5,1250.0,930.0,15.0,2250.0,6385.43,yes
+large_payload,578.7,5787.0,14.47,3.75,15.19,240.0,1584.0,349.31,437.5,1750.0,1240.0,37.5,2250.0,7888.31,yes
+growth_2x,1157.4,11574.1,11.57,3.0,12.15,192.0,1900.8,279.45,875.0,2000.0,1240.0,30.0,2250.0,8767.25,yes

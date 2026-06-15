@@ -1,0 +1,32 @@
+flowchart TB
+  SDK[Browser SDK<br/>existing contract] --> Edge[CloudFront + regional intake API<br/>Node/Python workers]
+  Edge --> Validate[Schema validation<br/>tenant auth<br/>idempotency key]
+  Validate --> KDS[Kinesis Data Streams<br/>durable intake]
+  Validate --> DLQ[SQS dead-letter queue<br/>bad schema / auth failures]
+
+  KDS --> Flink[Managed Apache Flink<br/>dedupe + sessionization + aggregates]
+  Flink --> Hot[DynamoDB hot aggregates<br/>tenant + metric + time bucket]
+  Flink --> Redis[Redis behavior state<br/>personalization triggers]
+  Flink --> S3[S3 raw + normalized event lake<br/>partitioned by tenant/date]
+  S3 --> Athena[Athena / Glue catalog<br/>audit and validation queries]
+  S3 --> Export[Customer warehouse exports<br/>Snowflake / BigQuery batch]
+  Hot --> Dashboard[Real-time dashboards<br/>freshness SLO]
+  Redis --> Personalize[Personalization decision API]
+
+  Control[PostgreSQL control plane<br/>tenants, schemas, export config] --> Edge
+  Control --> Flink
+  Control --> Export
+
+  Delete[GDPR/CCPA deletion request] --> Tombstone[Deletion tombstone + workflow]
+  Tombstone --> Redis
+  Tombstone --> Hot
+  Tombstone --> S3
+  Tombstone --> Export
+  Tombstone --> Audit[Deletion audit log]
+
+  Observe[CloudWatch + data quality checks] --> Edge
+  Observe --> KDS
+  Observe --> Flink
+  Observe --> Hot
+  Observe --> Export
+

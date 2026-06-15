@@ -1,0 +1,7 @@
+sensitivity_model run
+brief_peak gate=pass mbps=5.65 freshness=3.9s cost=$7040.0/month
+large_payload_10x gate=manual_review mbps=45.21 freshness=8.6s cost=$7302.5/month
+tenant_skew_35pct gate=manual_review mbps=5.65 freshness=3.9s cost=$9845.0/month
+late_events_15pct gate=manual_review mbps=5.65 freshness=8.8s cost=$8720.0/month
+export_write_amp_6x gate=manual_review mbps=5.65 freshness=3.9s cost=$10290.0/month
+cost_ceiling_pressure gate=fail mbps=180.84 freshness=29.7s cost=$55312.5/month

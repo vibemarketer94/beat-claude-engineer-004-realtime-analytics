@@ -1,0 +1,33 @@
+name: Reviewer Replay
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run reviewer replay
+        run: ./run_reviewer_packet.sh
+
+      - name: Upload replay artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reviewer-replay-artifacts
+          path: |
+            reviewer_run.log
+            verification_report.md
+            **/*_trace.log
+            **/*_report.md
+            **/*_results.csv
