@@ -25,9 +25,11 @@ Existing browser SDK traffic keeps its public contract. CloudFront and regional 
 
 **Behavioral segmentation and personalization.** Flink keeps per-tenant, per-user event-type counters in event-time windows, so a brief-style rule like "viewed pricing 3x [Observed] in a session" materializes a segment-membership flag into DynamoDB (and Redis for live triggers) that dashboards and the personalization API read directly — no rescan of the lake. The same counters feed the recent-behavior triggers, so segmentation and personalization share one stateful path rather than two.
 
+**Trust boundary and tenant isolation.** The browser SDK is public, so intake can't trust a client-supplied `tenant_id`. Each tenant has a server-side write key; intake verifies the key resolves to the claimed tenant in the control plane and sends mismatches to the DLQ with an audit entry. From there `tenant_id` is mandatory on every partition, aggregate key, cache key, and export, and per-tenant access scoping keeps one tenant's data unreadable by another's jobs and queries.
+
 **The judgment that protects the migration.** New-path gates compare against *accepted intake*, not against the broken old pipeline's counts. The current system loses about 3% at peak [Observed], so matching it would bless data loss. Gating against accepted intake is what lets "zero data loss" mean something measurable.
 
-**Compliance.** SOC 2 comes from KMS-encrypted storage, least-privilege IAM, audit logs, change-controlled rollout gates, and deletion evidence. GDPR/CCPA uses deletion tombstones propagated to Redis, DynamoDB, S3/delete manifests, exports, and an audit ledger.
+**Compliance.** SOC 2 comes from KMS-encrypted storage, encryption in transit (TLS), least-privilege IAM, audit logs, change-controlled rollout gates, and deletion evidence. GDPR/CCPA uses deletion tombstones propagated to Redis, DynamoDB, S3/delete manifests, exports, and an append-only audit ledger; a delete also clears the anonymous-to-known identity link (no re-identification) and takes effect immediately for live personalization, not on cache expiry. We erase every copy in our systems and drop the person from future exports; data already in a customer's own warehouse is theirs to remove, and we supply deletion proof.
 
 ---
 

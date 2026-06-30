@@ -1,7 +1,7 @@
 >>> python3 -m unittest benchmarks/test_old_vs_new_benchmark.py
 ..
 ----------------------------------------------------------------------
-Ran 2 tests in 0.007s
+Ran 2 tests in 0.006s
 
 OK
 <<< exit=0 expected=0
@@ -81,8 +81,8 @@ This simulation scales the migration problem down to synthetic dual-write cohort
 | Scenario | Events | Old seen | New seen | Old loss | New loss | Old/new delta | Duplicate % | Late % | Freshness p95 | Worst tenant delta | Gate |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
 | baseline_current | 50000 | 48484 | 49958 | 3.032% | 0.084% | 2.948% | 0.25% | 0.966% | 3.8s | 50 | yes |
-| black_friday_spike | 200000 | 193987 | 199597 | 3.006% | 0.201% | 2.805% | 0.574% | 2.988% | 4.7s | 143 | no |
-| new_pipeline_regression | 50000 | 48532 | 49405 | 2.936% | 1.19% | 1.746% | 1.065% | 2.022% | 6.4s | 29 | no |
+| black_friday_spike | 200000 | 194040 | 199599 | 2.98% | 0.2% | 2.78% | 0.59% | 2.982% | 4.7s | 149 | no |
+| new_pipeline_regression | 50000 | 48527 | 49406 | 2.946% | 1.188% | 1.758% | 0.982% | 1.936% | 6.4s | 34 | no |
 
 ## Gate Logic
 
@@ -178,7 +178,7 @@ OVERALL FAIL_REQUIRES_REVIEW
 - PASS: required file sensitivity/sensitivity_report.md - present
 - PASS: required file sensitivity/sensitivity_results.csv - present
 - PASS: required file sensitivity/sensitivity_trace.log - present
-- PASS: submission length - short answer 1225 words <= 1800; upload file 1747 words <= 2200 proxy
+- PASS: submission length - short answer 1225 words <= 1800; upload file 1878 words <= 2200 proxy
 - PASS: brief coverage 50M - mentioned in packet
 - PASS: brief coverage 10x - mentioned in packet
 - PASS: brief coverage 5 second - mentioned in packet

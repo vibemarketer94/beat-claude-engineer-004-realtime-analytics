@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from pathlib import Path
 
 
@@ -112,7 +112,7 @@ def write_outputs(rows: list[Scenario]) -> None:
     trace_path = ROOT / "sensitivity_trace.log"
 
     with csv_path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(Scenario.__dataclass_fields__))
+        writer = csv.DictWriter(handle, fieldnames=[f.name for f in fields(Scenario)])
         writer.writeheader()
         for row in rows:
             writer.writerow(row.__dict__)

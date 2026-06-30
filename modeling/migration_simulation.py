@@ -10,7 +10,6 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
-RNG = random.Random(42)
 
 
 @dataclass(frozen=True)
@@ -23,16 +22,20 @@ class Scenario:
     duplicate_rate: float
     late_rate: float
     freshness_p95_sec: float
+    seed: int
 
 
+# Each scenario carries its own seed so results are reproducible and independent
+# of evaluation order (a reviewer re-running any scenario sees the same numbers).
 SCENARIOS = [
-    Scenario("baseline_current", 50, 50_000, 0.03, 0.001, 0.003, 0.01, 3.8),
-    Scenario("black_friday_spike", 50, 200_000, 0.03, 0.002, 0.006, 0.03, 4.7),
-    Scenario("new_pipeline_regression", 50, 50_000, 0.03, 0.012, 0.010, 0.02, 6.4),
+    Scenario("baseline_current", 50, 50_000, 0.03, 0.001, 0.003, 0.01, 3.8, 42),
+    Scenario("black_friday_spike", 50, 200_000, 0.03, 0.002, 0.006, 0.03, 4.7, 43),
+    Scenario("new_pipeline_regression", 50, 50_000, 0.03, 0.012, 0.010, 0.02, 6.4, 44),
 ]
 
 
 def simulate(scenario: Scenario) -> dict[str, float | str]:
+    rng = random.Random(scenario.seed)
     intake_accepted = scenario.events
     old_seen = 0
     new_seen = 0
@@ -42,17 +45,17 @@ def simulate(scenario: Scenario) -> dict[str, float | str]:
 
     for i in range(scenario.events):
         tenant = f"tenant_{i % scenario.tenants:03d}"
-        old_ok = RNG.random() >= scenario.old_loss_rate
-        new_ok = RNG.random() >= scenario.new_loss_rate
+        old_ok = rng.random() >= scenario.old_loss_rate
+        new_ok = rng.random() >= scenario.new_loss_rate
         if old_ok:
             old_seen += 1
             tenant_deltas[tenant] += 1
         if new_ok:
             new_seen += 1
             tenant_deltas[tenant] -= 1
-            if RNG.random() < scenario.duplicate_rate:
+            if rng.random() < scenario.duplicate_rate:
                 duplicates += 1
-        if RNG.random() < scenario.late_rate:
+        if rng.random() < scenario.late_rate:
             late += 1
 
     old_loss_pct = (intake_accepted - old_seen) / max(intake_accepted, 1)

@@ -15,11 +15,22 @@
 | `properties` | Event payload | JSON object; schema-limited and size-limited. |
 | `schema_version` | Evolution | Required; defaults from intake adapter for older SDKs. |
 
+## Intake Authentication and Transport
+
+The browser SDK is public, so a client-supplied `tenant_id` cannot be trusted on its own. The trust boundary is intake:
+
+- Each tenant has a server-side write key (provisioned in the PostgreSQL control plane). Intake resolves the key to a tenant and rejects any request whose claimed `tenant_id` does not match the key's tenant.
+- Rejected/auth-failed requests go to the DLQ with an audit entry; they are never written to a tenant's stream. Auth-failure rate is a monitored rollout gate.
+- All traffic is encrypted in transit (TLS) as well as at rest (KMS). Exports to customer warehouses use short-lived signed credentials, not stored secrets.
+- Downstream isolation is enforced with per-tenant IAM scoping: a worker or export job can read only its own tenant's S3 partitions, and dashboard queries are tenant-scoped (no cross-tenant scans).
+
 ## Identity and Dedupe Rules
 
 - Dedupe key: `tenant_id:event_id`.
 - Tenant isolation is mandatory before any aggregate write.
 - Identity stitching is append-only: anonymous IDs can link to a known user, but old raw events are not rewritten during hot-path processing.
+- On a GDPR/CCPA delete, the anonymous-to-known identity link is cleared (or irreversibly hashed) so the person cannot be re-identified if an old anonymous ID is later reused.
+- Deletion takes effect immediately for live personalization (behavior state is tombstoned synchronously), not on natural cache expiry.
 - Late events update event-time windows when within retention; beyond retention they enter audit/replay flow.
 - Bad schema events go to DLQ with tenant, reason, and raw payload reference.
 

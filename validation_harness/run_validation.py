@@ -14,9 +14,6 @@ from collections import defaultdict
 from pathlib import Path
 
 
-PASS_WITH_WARNINGS_CASES = {"messy"}
-
-
 def load_events(path: Path) -> list[dict]:
     events: list[dict] = []
     with path.open("r", encoding="utf-8") as handle:
@@ -34,19 +31,32 @@ def load_events(path: Path) -> list[dict]:
 def validate_case(case: str, events: list[dict]) -> dict:
     seen: set[tuple[str, str]] = set()
     duplicates: list[str] = []
+    malformed: list[str] = []
     unique_events: list[dict] = []
     sequences_by_tenant_user: dict[tuple[str, str], list[int]] = defaultdict(list)
     old_expected_values = {event.get("old_pipeline_expected") for event in events}
 
-    for event in events:
-        key = (event["tenant_id"], event["event_id"])
+    for index, event in enumerate(events):
+        # Be robust to a reviewer's messy sample: an event missing its identity
+        # fields is flagged for review rather than crashing the harness.
+        tenant_id = event.get("tenant_id")
+        event_id = event.get("event_id")
+        if tenant_id is None or event_id is None:
+            malformed.append(f"event #{index} missing tenant_id/event_id")
+            continue
+        key = (tenant_id, event_id)
         if key in seen:
-            duplicates.append(f"{event['tenant_id']}:{event['event_id']}")
+            duplicates.append(f"{tenant_id}:{event_id}")
             continue
         seen.add(key)
         unique_events.append(event)
         actor = event.get("user_id") or event.get("anonymous_id") or "unknown"
-        sequences_by_tenant_user[(event["tenant_id"], actor)].append(int(event["sequence"]))
+        try:
+            sequence = int(event["sequence"])
+        except (KeyError, TypeError, ValueError):
+            malformed.append(f"{tenant_id}:{event_id} missing/invalid sequence")
+            continue
+        sequences_by_tenant_user[(tenant_id, actor)].append(sequence)
 
     missing_sequences: list[str] = []
     for (tenant_id, actor), sequences in sequences_by_tenant_user.items():
@@ -65,12 +75,14 @@ def validate_case(case: str, events: list[dict]) -> dict:
         warnings.append(f"duplicates={len(duplicates)}")
     if missing_sequences:
         warnings.append(f"missing_sequences={len(missing_sequences)}")
+    if malformed:
+        warnings.append(f"malformed={len(malformed)}")
     if not parity_ok:
         warnings.append(f"parity_mismatch old={old_expected} new={len(unique_events)}")
 
-    pass_gate = parity_ok and not missing_sequences
-    if case in PASS_WITH_WARNINGS_CASES:
-        pass_gate = parity_ok and not missing_sequences
+    # Duplicates are warnings only; missing sequences, parity mismatch, or
+    # malformed events fail the gate and route to human review.
+    pass_gate = parity_ok and not missing_sequences and not malformed
 
     return {
         "case": case,
@@ -78,6 +90,7 @@ def validate_case(case: str, events: list[dict]) -> dict:
         "unique_events": len(unique_events),
         "duplicates": duplicates,
         "missing_sequences": missing_sequences,
+        "malformed": malformed,
         "old_expected": old_expected,
         "parity_ok": parity_ok,
         "pass_gate": pass_gate,
@@ -93,7 +106,7 @@ def main() -> int:
     events = load_events(Path(sys.argv[1]))
     by_case: dict[str, list[dict]] = defaultdict(list)
     for event in events:
-        by_case[event["case"]].append(event)
+        by_case[event.get("case", "uncategorized")].append(event)
 
     overall_ok = True
     for case in sorted(by_case):
@@ -110,6 +123,8 @@ def main() -> int:
             print(f"  warning: {warning}")
         for missing in result["missing_sequences"]:
             print(f"  review: {missing}")
+        for bad in result["malformed"]:
+            print(f"  review: {bad}")
         if not result["pass_gate"]:
             print("  action: hold rollout and require human review")
 

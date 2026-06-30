@@ -1,4 +1,4 @@
 scenario,input_events,old_seen,new_seen,old_loss_pct,new_loss_pct,old_new_delta_pct,duplicate_pct,late_pct,freshness_p95_sec,worst_tenant_delta,pass_gate
 baseline_current,50000,48484,49958,3.032,0.084,2.948,0.25,0.966,3.8,50,yes
-black_friday_spike,200000,193987,199597,3.006,0.201,2.805,0.574,2.988,4.7,143,no
-new_pipeline_regression,50000,48532,49405,2.936,1.19,1.746,1.065,2.022,6.4,29,no
+black_friday_spike,200000,194040,199599,2.98,0.2,2.78,0.59,2.982,4.7,149,no
+new_pipeline_regression,50000,48527,49406,2.946,1.188,1.758,0.982,1.936,6.4,34,no

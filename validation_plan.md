@@ -9,6 +9,8 @@
 | Freshness | Event received time to dashboard availability | [Observed target] less than 5 seconds p95 |
 | Export correctness | Exported row counts and checksums by partition | [Estimated] less than 0.5% unexplained delta |
 | Deletion completeness | Tombstone audit against hot, lake, export, and cache stores | [Estimated] 100% required surfaces acknowledged |
+| Deletion immediacy | Live personalization/behavior state checked for tombstoned users | [Estimated] deleted users excluded from decisions within seconds, not on cache expiry |
+| Intake authentication | Requests whose write key does not match the claimed tenant | [Estimated] auth-failure rate near 0%; all failures audited and DLQ-routed before any cohort cutover |
 
 ## Synthetic Harness Coverage
 

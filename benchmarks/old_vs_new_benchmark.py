@@ -75,8 +75,11 @@ def pct(part: int | float, whole: int | float) -> float:
 
 
 def improvement(before: float, after: float) -> float:
+    # Every scenario has a non-zero broken-pipeline baseline (loss and latency),
+    # so before > 0 here. The guard avoids a divide-by-zero only; it is not a
+    # path that hides a regression in the modeled scenarios.
     if before == 0:
-        return 0.0
+        return 0.0 if after == 0 else -100.0
     return ((before - after) / before) * 100
 
 
