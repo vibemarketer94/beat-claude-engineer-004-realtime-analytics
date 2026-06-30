@@ -1,5 +1,16 @@
 # Migration Runbook
 
+## Delivery Timeline (2 senior engineers)
+
+The brief gives [Observed] 2 senior engineers full-time, an MVP in [Observed] 3 months, and the full system in [Observed] 6 months. The phases below map onto that capacity. Managed services (Kinesis, Flink, DynamoDB) are the enabling choice: they remove cluster operations so two people can ship this.
+
+| Window | Phase(s) | Outcome |
+|---|---|---|
+| Months 1-2 [Observed] | Phase 0-1 | SDK-compatible intake, Kinesis durable stream, S3 raw lake + replay, old-path instrumentation. No accepted event is unrecoverable. |
+| Month 3 [Observed] | Phase 2-3 | Flink dedupe/aggregates, DynamoDB hot store, under-5-second [Observed] dashboards, dual-write, parity/freshness gates. MVP: real-time dashboards live for an internal + design-partner cohort with tenant rollback. |
+| Months 4-5 [Observed] | Phase 3-4 | Personalization (Redis + decision API), behavioral segmentation, warehouse exports with checksums, GDPR/CCPA deletion workflow with per-surface acknowledgements and audit ledger. |
+| Month 6 [Observed] | Phase 4-5 | Remaining tenant cohorts cut over, old reads retired after a full dual-write business cycle, replay/chaos drills and freshness SLO dashboards added. |
+
 ## Phase 0: Instrument Current Path
 
 - Add request IDs, tenant IDs, received counts, accepted counts, and drop reasons to the current path.

@@ -1,5 +1,9 @@
 # Engineer 004: Real-Time Analytics Pipeline Submission
 
+> **SUPERSEDED — do not review.** This is an earlier, longer working draft.
+> The canonical submission is **`ENGINEER_004_SUBMISSION_READY.md`** (kept within
+> the 4-page limit). This file is retained only for history.
+
 ## Written Answer
 
 ### Thesis

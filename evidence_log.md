@@ -1,6 +1,8 @@
 # Evidence Log
 
-This log uses the public `SCORING.md` tiers literally. The packet has Tier 2 demo artifacts and Tier 3 generated logs/source records. It does not claim Tier 4 before/after production data or Tier 5 independent verification.
+This log uses the public `SCORING.md` tiers literally. The packet has Tier 2 demo artifacts, Tier 3 generated logs/source records, and a synthetic Tier 4 before/after benchmark (measured change with a clear method, not production data). The reviewer replay is reproduced in a clean environment by GitHub Actions, but no external human or customer has confirmed the result, so no Tier 5 human verification is claimed.
+
+Note on labels: `[Observed synthetic]` is a sub-label of the four public labels — it means a figure observed from a runnable synthetic model rather than a production system. For source-label purposes it is treated as `[Estimated]`; it is called out only to be explicit that the number comes from an inspectable benchmark, not production.
 
 | Claim | Source Label | Proof Tier | Evidence Type | Artifact | Why This Tier | Limitation |
 |---|---|---:|---|---|---|---|
@@ -21,6 +23,7 @@ This log uses the public `SCORING.md` tiers literally. The packet has Tier 2 dem
 | Sensitivity sweep covers six scale and budget cliff scenarios. | [Observed synthetic] | 2 | Demo artifact | `sensitivity/sensitivity_report.md`, `sensitivity/sensitivity_results.csv` | Runnable model names when cutover passes, needs manual review, or fails. | Synthetic model, not measured AWS load test. |
 | Sensitivity tests pass and generated trace records a budget fail gate. | [Observed] | 3 | Test output and generated log | `sensitivity/test_sensitivity_model.py`, `sensitivity/sensitivity_trace.log`, `verification_report.md` | Packet verifier runs the tests and script. | Local test execution only. |
 | Reviewer replay runs tests, scripts, validation, and packet verification from one command. | [Observed] | 3 | Generated log | `run_reviewer_packet.sh`, `reviewer_run.log` | Replay log records command output and expected exit codes. | Local replay only unless run by CI or reviewer. |
+| Reviewer replay reproduces in a clean environment. | [Observed] | 3 | CI run record | `.github/workflows/reviewer-replay.yml`, GitHub Actions run history | GitHub Actions runs the full replay on every push and is green. | Machine reproduction, not human/customer verification; not Tier 5. |
 | Validation harness detects duplicates, missing sequences, and parity mismatch. | [Observed] | 2 | Demo artifact | `validation_harness/run_validation.py`, `validation_harness/sample_events.jsonl` | Runnable artifact demonstrates behavior. | Synthetic proof only. |
 | Local validation harness trace was generated. | [Observed] | 3 | Generated log | `validation_harness/validation_trace.log` | Local run output records the result. | Not independent verification. |
 | Migration gates catch a new-pipeline regression before cutover. | [Observed] | 2 | Demo artifact | `modeling/migration_simulation.py`, `modeling/migration_simulation_report.md` | Runnable simulation demonstrates the gate. | Synthetic simulation only. |

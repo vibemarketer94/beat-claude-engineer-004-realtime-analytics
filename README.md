@@ -1,20 +1,30 @@
 # Engineer 004 Submission Packet
 
+[![Reviewer Replay](https://github.com/vibemarketer94/beat-claude-engineer-004-realtime-analytics/actions/workflows/reviewer-replay.yml/badge.svg)](https://github.com/vibemarketer94/beat-claude-engineer-004-realtime-analytics/actions/workflows/reviewer-replay.yml)
+
 This packet answers the Beat Claude Engineer 004 challenge: design a real-time analytics pipeline for a martech product with [Observed] 50M events/day, [Observed] 10x spikes, [Observed] less than 5 second dashboard freshness, [Observed] 500+ tenants, warehouse exports, and GDPR/CCPA deletion.
 
 Public artifact repo: https://github.com/vibemarketer94/beat-claude-engineer-004-realtime-analytics
 
+The green badge above means GitHub Actions independently re-ran the full reviewer replay (`./run_reviewer_packet.sh`) in a clean environment — the proof is reproducible off the author's machine, not just locally.
+
+## Architecture
+
+![Architecture: data flow from SDK through intake, stream processing, hot serving, lake, exports, personalization, and deletion](architecture.png)
+
+Diagram source: `architecture.mmd`.
+
 ## Upload File
 
-Upload `ENGINEER_004_SUBMISSION_READY.md`. It is the concise, single-file submission with the written answer, diagrams, embedded artifact evidence, evidence log, source labels, AI disclosure, failure modes, and human-decision notes.
+**Upload `ENGINEER_004_SUBMISSION_READY.md`** — the canonical submission. The written answer (3 brief sections + delivery plan) is kept within the 4-page limit; the required packet items that follow it (evidence log, number labels, AI disclosure, failure modes, human-decision notes) are explicitly marked as out-of-page-count and link to the artifacts in this repo.
 
-`ENGINEER_004_FULL_SUBMISSION.md` is retained as a longer working packet, not the recommended upload.
+`submission.md` is a longer working draft kept for internal reference. `ENGINEER_004_FULL_SUBMISSION.md` is a superseded earlier draft, not for review.
 
 ## Review Order
 
 1. Read `ENGINEER_004_SUBMISSION_READY.md` for the upload-ready answer.
 2. Read `operating_artifact.md` for the inspectable engineering artifact index and commands.
-3. Open `architecture.mmd` for the system diagram.
+3. See `architecture.png` (rendered) or `architecture.mmd` (source) for the system diagram.
 4. Run the full reviewer replay:
 
 ```bash

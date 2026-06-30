@@ -44,7 +44,7 @@
 - PASS: required file sensitivity/sensitivity_report.md - present
 - PASS: required file sensitivity/sensitivity_results.csv - present
 - PASS: required file sensitivity/sensitivity_trace.log - present
-- PASS: submission length - short answer 1221 words <= 1800; upload file 1641 words <= 2200 proxy
+- PASS: submission length - short answer 1225 words <= 1800; upload file 1628 words <= 2200 proxy
 - PASS: brief coverage 50M - mentioned in packet
 - PASS: brief coverage 10x - mentioned in packet
 - PASS: brief coverage 5 second - mentioned in packet

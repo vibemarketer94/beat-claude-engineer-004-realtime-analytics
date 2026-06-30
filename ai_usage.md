@@ -30,11 +30,12 @@
 - Validation harness output against normal, messy, and failure cases.
 - Before/after benchmark tests, curveball tests, sensitivity tests, model generation, and reviewer replay output.
 - Number labels and evidence-tier mapping.
+- That the reviewer replay reproduces in a clean environment: GitHub Actions runs `./run_reviewer_packet.sh` on every push and is green.
 
 ## Known Weak Spots
 
 - The cost model is a planning model, not an AWS quote.
 - The validation harness uses synthetic data.
 - The curveball and sensitivity artifacts are synthetic operating evidence, not production incidents or load tests.
-- The reviewer replay is local unless run by CI or an independent reviewer.
+- The replay is reproduced by CI (GitHub Actions), but no external human or customer has verified the result, so no Tier 5 human verification is claimed.
 - The architecture assumes AWS regions and account limits that must be verified before production buildout.
